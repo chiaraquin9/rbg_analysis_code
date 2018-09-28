@@ -55,10 +55,10 @@ def createGeoTIFF(filename, g, orig_array_shape, new_array, data_type=gdal.GDT_F
 
 
 # Where is your data?
-dirpath = '/home/s1326314/RBGdata'
+dirpath = '/exports/csce/datastore/geos/users/s1326314/rbg_analysis'
 
 # Find Red and NIR bands
-landsat_bands = sorted( glob.glob(dirpath + '/LandSat/LC08_L1TP_182058_20180523_20180605_01_T1.tar/*.TIF'))
+landsat_bands = sorted( glob.glob(dirpath + '/landsat/LC08_L1TP_182058_20180523_20180605_01_T1.tar/*.TIF'))
 bands = [x for x in landsat_bands if "B4" in x or "B5" in x] # "List comprehension
 # Load the red band to get spatial information
 gRed = gdal.Open(bands[0]) 
@@ -79,7 +79,7 @@ os.remove(vrt_name)
 Extract gain and offset values for converting DN to radiance, and then convert to reflectance
 https://yceo.yale.edu/how-convert-landsat-dns-top-atmosphere-toa-reflectance
 """
-metaPath = glob.glob(dirpath + '/LandSat/LC08_L1TP_182058_20180523_20180605_01_T1.tar/*MTL.txt')[0]
+metaPath = glob.glob(dirpath + '/landsat/LC08_L1TP_182058_20180523_20180605_01_T1.tar/*MTL.txt')[0]
 metadata = open(metaPath, 'r') # Read in the metadata
 gain= []; 
 offset = []; 
@@ -109,18 +109,18 @@ ndvi_data = np.where( (data[0,:,:]>0) | (data[1,:,:] >0), ((nir_TOA - red_TOA) /
 ndvi_data = np.where( (ndvi_data >1) | ((ndvi_data < 0) & (ndvi_data != -32768)), 0, ndvi_data) # Recode negative
 
 
-filename = '/home/s1326314/RBGdata/NDVI.tif' 
+filename = '/exports/csce/datastore/geos/users/s1326314/rbg_analysis/outputs/landsat/NDVI.tif' 
 createGeoTIFF(filename, gRed, np.shape(data[0,:,:]),ndvi_data,noData = -32768, overwrite = 'yes')
 
 
 """ Crop shapefiles """
-shapefiles = sorted( glob.glob(dirpath + '/shpfiles_poly_proj/projected/*.shp')
-#shapefiles_merg = sorted( glob.glob(dirpath + '/shpfiles_merged/*.shp'))
+shapefiles = sorted(glob.glob(dirpath + '/raw_data/site1/raw_shpfiles/projected/*.shp'))
 
 output=[]
-for shp in shapefiles_merg:
+
+for shp in shapefiles:
     base=os.path.splitext(os.path.basename(shp))[0].replace(' ', '_')
-    crop_fname = dirpath + '/temp.tif'
+    crop_fname = dirpath + '/outputs/landsat/site1/temp.tif'
     os.system('gdalwarp -overwrite -cutline ' + shp.replace(' ', '\ ') + ' -crop_to_cutline ' + filename  + ' ' + crop_fname)
     g =gdal.Open(crop_fname)    
     data = gdal_array.DatasetReadAsArray(g)
@@ -130,7 +130,7 @@ for shp in shapefiles_merg:
 print(output)
 
 #export to csv    
-with open(dirpath + '/stats.csv', "w") as myfile:
+with open(dirpath + '/outputs/landsat/site1/ndvi_stats_site1.csv', "w") as myfile:
     writer = csv.writer(myfile, lineterminator='\n')
     writer.writerow(('Plot','Mean','Std'))
     writer.writerows(output)
