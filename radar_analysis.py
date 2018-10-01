@@ -24,17 +24,31 @@ import csv
 import re
 
 
+##convert DN into backscatter
+#def convert(x):
+#    """
+#    convert Digital Numbers from radar raster into backscatter
+#    """
+#    s = 10*np.log10(x**2)-83.0
+#    return s
+#
+##convert std into backscatter
+#def convert_std(x,ds):
+#    """
+#    convert Digital Numbers from radar raster into backscatter (for standard deviation)
+#    """
+#    ds = (2/(x*np.log(10)))*ds
+#    return ds
+
+
 # Where is your data?
 dirpath = '/exports/csce/datastore/geos/users/s1326314/rbg_analysis'
  
 #get shapefiles
 shapefiles = sorted(glob.glob(dirpath + '/raw_data/site1/raw_shpfiles/projected/*.shp'))
 
-
-# HV data
-HV=[]
-HH=[]
-HH_HV_ratio=[]
+output=[]
+sigma=[]
 
 #loop for each year for all the HV and hh (years after 2015 are from ALOS Palsar2):
 for folder in os.listdir(dirpath + '/radar/'):
@@ -48,45 +62,46 @@ for folder in os.listdir(dirpath + '/radar/'):
     
     #crop shapefiles
     for shp in shapefiles:
-        base = re.findall('\d+',shp)
-        crop_fname_HV = dirpath + '/outputs/radar/site1/temp_HV.tif'
-        crop_fname_HH = dirpath + '/outputs/radar/site1/temp_HH.tif'
+        base = re.findall('\d+',shp) # get plot number
+        index = int(base[2])
+        
+        crop_fname= dirpath + '/outputs/site1/radar/temp.tif'
         
         #get HV stats
-        os.system('gdalwarp -overwrite -cutline ' + shp.replace(' ', '\ ') + ' -crop_to_cutline ' + f_HV + ' ' + crop_fname_HV)
-        gHV =gdal.Open(crop_fname_HV)    
+        os.system('gdalwarp -overwrite -cutline ' + shp.replace(' ', '\ ') + ' -crop_to_cutline ' + f_HV + ' ' + crop_fname)
+        gHV =gdal.Open(crop_fname)    
         data_HV = gdal_array.DatasetReadAsArray(gHV)
         mean_HV = round(np.mean(data_HV),2)
         std_HV = round(np.std(data_HV),2)
-        HV.append([base[2],mean_HV,std_HV]) #for each plot, save label, mean, std   
-        
+    
         #get HH stats
-        os.system('gdalwarp -overwrite -cutline ' + shp.replace(' ', '\ ') + ' -crop_to_cutline ' + f_HH + ' ' + crop_fname_HH)
-        gHH =gdal.Open(crop_fname_HH)    
+        os.system('gdalwarp -overwrite -cutline ' + shp.replace(' ', '\ ') + ' -crop_to_cutline ' + f_HH + ' ' + crop_fname)
+        gHH =gdal.Open(crop_fname)
+
         data_HH = gdal_array.DatasetReadAsArray(gHH)
         mean_HH = round(np.mean(data_HH),2)
         std_HH = round(np.std(data_HH),2)
-        HH.append([base[2],mean_HH,std_HH]) #for each plot, save label, mean, std 
-    
-    #export HV to csv    
-    with open(dirpath + '/outputs/radar/site1/HV_'+ yr +'.csv', "w") as myfile:
+        
+        #get HH/HV stats
+        mean_HH_HV = mean_HH/mean_HV
+        std_HH_HV = std_HH/std_HV
+        
+        #save to array
+        output.append([index,mean_HV,std_HV,mean_HH,std_HH,mean_HH_HV,std_HH_HV]) #for each plot, save label, mean, std            
+        output.sort(key=lambda x: x[0])
+        
+    #export to csv    
+    with open(dirpath + '/outputs/site1/radar/stats_'+ yr +'.csv', "w") as myfile:
         writer = csv.writer(myfile, lineterminator='\n')
-        writer.writerow(('Plot','Mean','Std'))
-        writer.writerows(HV)
-    myfile.close()
+        writer.writerow(('Plot','Mean_HV','Std_HV','Mean_HH','Std_HH','Mean_HH/HV','Std_HH/HV'))
+        writer.writerows(output)
+        myfile.close()
     
-    #export HH to csv 
-    with open(dirpath + '/outputs/radar/site1/HH_'+ yr +'.csv', "w") as myfile:
-        writer = csv.writer(myfile, lineterminator='\n')
-        writer.writerow(('Plot','Mean','Std'))
-        writer.writerows(HH)
-    myfile.close()
-    
-    print("Saved")
-    del HV[:]
-    del HH[:]
+    print("...Exported")
+    del output[:]
     
 
+    
 
 
 
