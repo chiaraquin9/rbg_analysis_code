@@ -8,4 +8,4 @@ Containing the code used for the analysis of RBG data
 * Radar data is processed using radar\_analysis.py. DN have been converted in backscatter. 
 ## Plotting
 
-Plot.py used to plot HH,HV, HH\_HV as a function of ABG per each plot. 
+Plot.py used to plot HH,HV, HH\_HV as a function of AGB per each plot. 
