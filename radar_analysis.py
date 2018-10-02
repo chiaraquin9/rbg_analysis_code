@@ -22,23 +22,27 @@ import os, os.path
 import osgeo.ogr
 import csv
 import re
+import matplotlib.pyplot as plt
 
 
-##convert DN into backscatter
-#def convert(x):
-#    """
-#    convert Digital Numbers from radar raster into backscatter
-#    """
-#    s = 10*np.log10(x**2)-83.0
-#    return s
-#
-##convert std into backscatter
-#def convert_std(x,ds):
-#    """
-#    convert Digital Numbers from radar raster into backscatter (for standard deviation)
-#    """
-#    ds = (2/(x*np.log(10)))*ds
-#    return ds
+#convert DN into backscatter
+def convert(x):
+    """
+    convert Digital Numbers from radar raster into backscatter
+    x = DN
+    """
+    s = 10*np.log10(x**2)-83.0
+    return s
+
+#convert std into backscatter (error propagation)
+def std(x,dx):
+    """
+    convert Digital Numbers from radar raster into backscatter (for standard deviation)
+    x = DN
+    dx = error on DN
+    """
+    ds = (2/(x*np.log(10)))*dx
+    return ds
 
 
 # Where is your data?
@@ -88,18 +92,22 @@ for folder in os.listdir(dirpath + '/radar/'):
         
         #save to array
         output.append([index,mean_HV,std_HV,mean_HH,std_HH,mean_HH_HV,std_HH_HV]) #for each plot, save label, mean, std            
-        output.sort(key=lambda x: x[0])
+        #convert from DN in sigma
+        output_conv = [(i1, convert(i2),std(i2,i3),convert(i4),std(i4,i5),i6,i7) for i1,i2,i3,i4,i5,i6,i7 in output]
+        output_conv.sort(key=lambda x: x[0])
         
     #export to csv    
     with open(dirpath + '/outputs/site1/radar/stats_'+ yr +'.csv', "w") as myfile:
         writer = csv.writer(myfile, lineterminator='\n')
         writer.writerow(('Plot','Mean_HV','Std_HV','Mean_HH','Std_HH','Mean_HH/HV','Std_HH/HV'))
-        writer.writerows(output)
+        writer.writerows(output_conv)
         myfile.close()
     
     print("...Exported")
     del output[:]
+    del output_conv[:]
     
+
 
     
 
