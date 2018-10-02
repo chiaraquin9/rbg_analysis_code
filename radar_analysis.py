@@ -7,13 +7,6 @@ Created on Fri Aug 17 10:23:04 2018
 @author: s1326314
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Aug 13 10:03:20 2018
-
-@author: imcnicol
-"""
-
 ## Load necessary libraries
 from osgeo import gdal, gdal_array
 import numpy as np
