@@ -1,4 +1,5 @@
-### processing radar images
+### processing radar images: calculating mean and standard deviation for HH,HV and HV/HH ratio. 
+### there's also an option to filter out outliers to reduce standard deviation.
 
 # -*- coding: utf-8 -*-
 """
@@ -38,6 +39,7 @@ def std(x,dx):
     ds = (20/(x*np.log(10)))*dx
     return ds
 
+#propagation of errors 
 def propagation(x,dx,y,dy,q):
     """
     propagate uncertainties in the ratio

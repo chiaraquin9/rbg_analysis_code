@@ -14,8 +14,8 @@ import numpy as np
 from matplotlib.lines import Line2D
 import os, os.path
 
-#dirpath = '/exports/csce/datastore/geos/users/s1326314/rbg_analysis'
-dirpath = 'R:/rbg_analysis'
+dirpath = '/exports/csce/datastore/geos/users/s1326314/rbg_analysis'
+#dirpath = 'R:/rbg_analysis'
 
 #plotting parameters
 params = {'legend.fontsize': 'x-large',
@@ -66,7 +66,7 @@ HV_HH = [float(i[7]) for i in matches if i[0] == y]
 dHV_HH = [float(i[8]) for i in matches if i[0] == y]
 
 
-
+# select red for logged and green for unlogged plots
 colors = ['red' if i > 11 else 'green' for i in plot_no]
 lines = [Line2D([0], [0], marker='o', color='r', lw=3, label='Logged Plots'),
                    Line2D([0], [0], marker='o', color='g', lw=3, label='Unlogged Plots')]
@@ -134,33 +134,3 @@ for pos,y,err,color in zip(AGB17,HV_HH17,dHV_HH17,colors):
     plt.figlegend(handles=lines_time,loc=(0.2,0.1))
     fig.savefig(dirpath + '/outputs/site1/radar/ALOS_PALSAR/HH_HV_compare07_17.pdf', bbox_inches='tight')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-##import radar data for each year
-#radar = []
-#
-#files = glob.glob(dirpath + '/outputs/site1/radar/*.csv')
-#for fle in files:
-#   # open the file and then call .read() to get the text
-#   with open(fle) as f, open("{}.csv".format(fle.rsplit(".", 1)[1]),"w") as out:
-#       next(f)
-#       reader = csv.reader(f)
-#       for row in reader:
-#           radar.append(row)
-#print(radar) 
