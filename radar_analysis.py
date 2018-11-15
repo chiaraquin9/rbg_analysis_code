@@ -49,6 +49,7 @@ def propagation(x,dx,y,dy,q):
 
 # Where is your data?
 dirpath = '/exports/csce/datastore/geos/users/s1326314/rbg_analysis'
+#dirpath = 'R:/rbg_analysis'
 
  
 #get shapefiles
@@ -62,10 +63,14 @@ for folder in os.listdir(dirpath + '/radar/ALOS_PALSAR/'):
     if yr == '17' or yr == '16' or yr == '15':
         f_HV = dirpath + '/radar/ALOS_PALSAR/N03E016_'+ yr + '_MOS/N03E016_' + yr + '_sl_HV_F02DAR'
         f_HH = dirpath + '/radar/ALOS_PALSAR/N03E016_'+ yr + '_MOS/N03E016_' + yr + '_sl_HH_F02DAR'
+        yr = ("".join(('20', yr)))
     else:
         f_HV = dirpath + '/radar/ALOS_PALSAR/N03E016_'+ yr + '_MOS/N03E016_' + yr + '_sl_HV'
         f_HH = dirpath + '/radar/ALOS_PALSAR/N03E016_'+ yr + '_MOS/N03E016_' + yr + '_sl_HH'
-    
+        if yr == '96':
+            yr = ("".join(('19', yr)))
+        else:
+            yr = ("".join(('20', yr)))    
     #crop shapefiles
     for shp in shapefiles:
         base = re.findall('\d+',shp) # get plot number
@@ -106,18 +111,19 @@ for folder in os.listdir(dirpath + '/radar/ALOS_PALSAR/'):
         d_HV_HH = propagation(mean_HV,std_HV,mean_HH,std_HH,HV_HH)
         
         #save to array
-        output.append([index,HV,dHV,HH,dHH,HV_HH,d_HV_HH])
-        output.sort(key=lambda x: x[0])
+        output.append([yr,index,HV,dHV,HH,dHH,HV_HH,d_HV_HH])
+        output.sort(key=lambda x: x[1])
         
     #export to csv    
     with open(dirpath + '/outputs/site1/radar/ALOS_PALSAR/stats_'+ yr +'.csv', "w") as myfile:
         writer = csv.writer(myfile, lineterminator='\n')
-        writer.writerow(('Plot','HV','d_HV','HH','d_HH','HV/HH','d_HV/HH'))
+        writer.writerow(('Year','Plot','HV','d_HV','HH','d_HH','HV/HH','dHV/HH'))
         writer.writerows(output)
         myfile.close()
     
     print("...Exported")
     del output[:]
+    
     
     
 
