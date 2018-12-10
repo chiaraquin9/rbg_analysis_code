@@ -48,15 +48,17 @@ unlogged = unl.groupby(['Year']).mean()      # calculate averages for each year
 ####### Sentinel-1 ######
 
 #import csv file containing S1 backscatter data for 1 year
-s1 = pd.read_csv( dirpath + '/outputs/site1/radar/S1/S1_stats_2016.csv')
+s1 = pd.read_csv( dirpath + '/outputs/site1/radar/S1/2016_stats_allyear.csv')
 
 ls1 = s1.drop(s1[s1.Plot < 12].index)      # remove data of unlogged plots
 s1logged = ls1.mean()
 unls1 = s1.drop(s1[s1.Plot > 11].index)      # remove data of unlogged plots
 s1unlogged = unls1.mean()
 
-s1_data = ['VV', 'VH', 'VV/VH']
+s1_data = ['VV', 'VH', 'VH/VV']
 alos_data = ['HH', 'HV', 'HV/HH']
+
+
 
 ################################################################################
 ######################### BACKSCATTER PLOTS #############################
@@ -277,7 +279,6 @@ fig.savefig(dirpath + '/outputs/site1/radar/ALOS_vs_S1.pdf',
         bbox_inches='tight')
 
 
-##### seasonal variation for year 2016 ####
 
 
 

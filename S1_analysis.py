@@ -65,10 +65,10 @@ output=[]
 
 #VH compares to HH while VV compares to HV
 
+#year data
 
 f_VV = dirpath + '/radar/S1/S1_VV_Mean_2016_20m.tif'
 f_VH = dirpath + '/radar/S1/S1_VH_Mean_2016_20m.tif'
-
 
 for shp in shapefiles:
     base = re.findall('\d+',shp) # get plot number
@@ -82,8 +82,7 @@ for shp in shapefiles:
     data_VH = gdal_array.DatasetReadAsArray(gVH)
     mean_VH = np.mean(data_VH)
     std_VH = np.std(data_VH)
-    
-    
+            
 
     #get VV statsdA
     os.system('gdalwarp -overwrite -cutline ' + shp.replace(' ', '\ ') + ' -crop_to_cutline ' + f_VV + ' ' + crop_fname)
@@ -93,17 +92,17 @@ for shp in shapefiles:
     std_VV = np.std(data_VV)
     
     #get HV/HH stats (this ratio is not reported in db)
-    VV_VH = mean_VV/mean_VH
-    d_VV_VH = propagation(mean_VH,std_VH,mean_VV,std_VV,VV_VH)
+    VH_VV = mean_VH/mean_VV
+    d_VH_VV = propagation(mean_VH,std_VH,mean_VV,std_VV,VH_VV)
     
     #save to array
-    output.append([index,mean_VH,std_VH,mean_VV,std_VV,VV_VH,d_VV_VH])
+    output.append([index,mean_VH,std_VH,mean_VV,std_VV,VH_VV,d_VH_VV])
     output.sort(key=lambda x: x[0])
     
 #export to csv    
-with open(dirpath + '/outputs/site1/radar/S1/S1_stats_2016.csv', "w") as myfile:
+with open(dirpath + '/outputs/site1/radar/S1/2016_stats_allyear.csv', "w") as myfile:
     writer = csv.writer(myfile, lineterminator='\n')
-    writer.writerow(('Plot','VH','d_VH','VV','d_VV','VV/VH','dVV/VH'))
+    writer.writerow(('Plot','VH','d_VH','VV','d_VV','VH/VV','dVH/VV'))
     writer.writerows(output)
     myfile.close()
 
